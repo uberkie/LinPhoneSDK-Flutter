@@ -218,6 +218,24 @@ public class LinPhoneHelper {
         }
     }
 
+    public void answer() {
+        if (core == null) return;
+        Call call = core.getCurrentCall();
+        if (call == null) return;
+        try {
+            CallParams params = core.createCallParams(call);
+            if (params != null) {
+                params.setMediaEncryption(MediaEncryption.SRTP);
+                safelyEnableAudio(params);
+                call.acceptWithParams(params);
+            } else {
+                call.accept();
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to answer call", e);
+        }
+    }
+
     public void removeLoginListener() {
         if (core == null) return;
         core.removeListener(coreListener);
@@ -266,6 +284,18 @@ public class LinPhoneHelper {
                 case Paused:
                     Log.e(TAG, "onCallStateChanged: Paused");
                     callEventListener.success(state.name());
+                    break;
+                case IncomingReceived:
+                    Log.e(TAG, "onCallStateChanged: IncomingReceived");
+                    callEventListener.success("Incoming");
+                    break;
+                case IncomingEarlyMedia:
+                    Log.e(TAG, "onCallStateChanged: IncomingEarlyMedia");
+                    callEventListener.success("Incoming");
+                    break;
+                case PushIncomingReceived:
+                    Log.e(TAG, "onCallStateChanged: PushIncomingReceived");
+                    callEventListener.success("Incoming");
                     break;
                 case PausedByRemote:
                     Log.e(TAG, "onCallStateChanged: PausedByRemote");
