@@ -40,7 +40,13 @@ public class MethodChannelHandler extends FlutterActivity implements MethodChann
                 String userName = (String) data.get("userName");
                 String domain = (String) data.get("domain");
                 String password = (String) data.get("password");
-                linPhoneHelper.login(userName, domain, password);
+                String transport = (String) data.get("transport");
+                Integer expires = null;
+                Object expiresObj = data.get("expires");
+                if (expiresObj instanceof Number) {
+                    expires = ((Number) expiresObj).intValue();
+                }
+                linPhoneHelper.login(userName, domain, password, transport, expires);
                 result.success("Success");
                 break;
             case "remove_listener":
