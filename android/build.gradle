@@ -22,7 +22,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    namespace = "package: com.spagreen.linphonesdk"
+    namespace "package: com.spagreen.linphonesdk"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
