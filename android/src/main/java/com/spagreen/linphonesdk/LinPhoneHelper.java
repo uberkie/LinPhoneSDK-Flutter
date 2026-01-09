@@ -36,6 +36,8 @@ public class LinPhoneHelper {
     private static Core core = null;
     private Context context;
     private String domain, userName, password;
+    private TransportType transportType = TransportType.Udp;
+    private int expiresSeconds = 3600;
     private EventChannelHelper loginListener;
     private EventChannelHelper callEventListener;
 
@@ -46,15 +48,18 @@ public class LinPhoneHelper {
         this.callEventListener = callEventListener;
     }
 
-    public void login(String userName, String domain, String password) {
+    public void login(String userName, String domain, String password, String transport, Integer expires) {
         this.domain = domain;
         this.userName = userName;
         this.password = password;
+        this.transportType = resolveTransport(transport);
+        if (expires != null && expires > 0) {
+            this.expiresSeconds = expires;
+        }
         Factory factory = Factory.instance();
         factory.setDebugMode(true, "LinPhoneSDKTest");
         core = factory.createCore(null, null, context);
 
-        TransportType transportType = TransportType.Udp;
         AuthInfo authInfo = Factory.instance().createAuthInfo(userName, null, password, null, null, domain, null);
         AccountParams params = core.createAccountParams();
 
@@ -66,6 +71,7 @@ public class LinPhoneHelper {
         address.setTransport(transportType);
         params.setServerAddress(address);
         params.setRegisterEnabled(true);
+        params.setExpires(expiresSeconds);
 
         Account account = core.createAccount(params);
         core.addAuthInfo(authInfo);
@@ -85,6 +91,19 @@ public class LinPhoneHelper {
         core.start();
     }
 
+    private TransportType resolveTransport(String transport) {
+        if (transport == null) return TransportType.Udp;
+        switch (transport.toLowerCase()) {
+            case "tcp":
+                return TransportType.Tcp;
+            case "tls":
+                return TransportType.Tls;
+            case "udp":
+            default:
+                return TransportType.Udp;
+        }
+    }
+
     public void call(String number) {
         if (core == null) return;
         String formattedNumber = String.format("sip:%s@%s", number, domain);
@@ -98,7 +117,7 @@ public class LinPhoneHelper {
         params.setMediaEncryption(MediaEncryption.SRTP);
         // If we wanted to start the call with video directly
         //params.enableVideo(true)
-       safelyEnableAudio(params);
+        safelyEnableAudio(params);
         // Finally we start the call
         core.inviteAddressWithParams(remoteAddress, params);
     }
