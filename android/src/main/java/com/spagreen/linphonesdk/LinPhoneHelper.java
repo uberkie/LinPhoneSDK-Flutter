@@ -221,6 +221,12 @@ public class LinPhoneHelper {
     public void answer() {
         if (core == null) return;
         Call call = core.getCurrentCall();
+        if (call == null) {
+            Call[] calls = core.getCalls();
+            if (calls != null && calls.length > 0) {
+                call = calls[0];
+            }
+        }
         if (call == null) return;
         try {
             CallParams params = core.createCallParams(call);
