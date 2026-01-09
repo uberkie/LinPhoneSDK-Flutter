@@ -72,6 +72,10 @@ public class MethodChannelHandler extends FlutterActivity implements MethodChann
                 linPhoneHelper.call(number);
                 result.success(true);
                 break;
+            case "answer":
+                linPhoneHelper.answer();
+                result.success(true);
+                break;
             case "transfer":
                 Map destinationMap = (Map) call.arguments;
                 String destination = (String) destinationMap.get("destination");
