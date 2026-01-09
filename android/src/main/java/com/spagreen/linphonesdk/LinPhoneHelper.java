@@ -98,9 +98,23 @@ public class LinPhoneHelper {
         params.setMediaEncryption(MediaEncryption.SRTP);
         // If we wanted to start the call with video directly
         //params.enableVideo(true)
-        params.enableAudio(true);
+       safelyEnableAudio(params);
         // Finally we start the call
         core.inviteAddressWithParams(remoteAddress, params);
+    }
+
+    private void safelyEnableAudio(CallParams params) {
+        try {
+            CallParams.class.getMethod("enableAudio", boolean.class).invoke(params, true);
+        } catch (NoSuchMethodException fallbackToSetAudioEnabled) {
+            try {
+                CallParams.class.getMethod("setAudioEnabled", boolean.class).invoke(params, true);
+            } catch (Exception noMatchingMethod) {
+                Log.w(TAG, "CallParams missing audio enable method; using defaults", noMatchingMethod);
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Unable to enable audio explicitly; using defaults", t);
+        }
     }
 
     public boolean callForward(String destination) {
